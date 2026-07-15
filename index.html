@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Finance Workspace</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #10B981;
+            --primary-hover: #059669;
+            --success: #34D399;
+            --danger: #FB7185;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --card-bg: rgba(15, 35, 25, 0.4);
+            --border: rgba(255, 255, 255, 0.08);
+            --shadow: 0 15px 35px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background: radial-gradient(circle at 15% 0%, #064E3B 0%, transparent 40%),
+                        radial-gradient(circle at 85% 100%, #022C22 0%, transparent 40%),
+                        linear-gradient(135deg, #021a14 0%, #043527 100%);
+            color: var(--text-main);
+            padding: 2rem 1rem;
+            min-height: 100vh;
+        }
+
+        .container { max-width: 1050px; margin: 0 auto; }
+
+        header { text-align: center; margin-bottom: 2.5rem; }
+        header h1 { font-size: 2.5rem; font-weight: 700; color: #FFFFFF; display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+        .nav-tabs { display: flex; justify-content: center; gap: 1rem; margin-bottom: 2.5rem; flex-wrap: wrap; }
+
+        .tab-btn {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border);
+            padding: 0.8rem 1.5rem; border-radius: 50px; color: var(--text-muted);
+            cursor: pointer; transition: all 0.3s;
+        }
+
+        .tab-btn.active { background: var(--primary); color: #011C14; font-weight: 600; }
+
+        .slide { display: none; }
+        .slide.active { display: block; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .card { background: var(--card-bg); backdrop-filter: blur(20px); padding: 2rem; border-radius: 24px; border: 1px solid var(--border); margin-bottom: 1.5rem; }
+
+        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+        .dash-card { text-align: center; padding: 2rem; }
+        .dash-card h2 { font-size: 2rem; margin-top: 10px; }
+
+        input, select, textarea { width: 100%; padding: 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; margin-bottom: 1rem; }
+        button.submit-btn { width: 100%; padding: 1rem; background: var(--primary); border: none; border-radius: 12px; cursor: pointer; font-weight: 700; color: #011C14; }
+
+        .item { display: flex; justify-content: space-between; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 12px; margin-bottom: 10px; }
+        .bank-badge { background: rgba(16, 185, 129, 0.15); padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; }
+        
+        .bank-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        .bank-stat { background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 16px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1><i class="ri-leaf-line" style="color: var(--primary);"></i> VaultSpace</h1>
+        </header>
+
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('dashboard', this)"><i class="ri-dashboard-2-line"></i> Dashboard</button>
+            <button class="tab-btn" onclick="switchTab('transactions', this)"><i class="ri-history-line"></i> Transactions</button>
+            <button class="tab-btn" onclick="switchTab('bank', this)"><i class="ri-wallet-3-line"></i> Bank & Cash</button>
+            <button class="tab-btn" onclick="switchTab('notes', this)"><i class="ri-sticky-note-line"></i> Notes</button>
+        </div>
+
+        <div id="dashboard" class="slide active">
+            <div class="dashboard">
+                <div class="card dash-card"><h3>Total In</h3><h2 class="text-success">৳ <span id="total-savings">0</span></h2></div>
+                <div class="card dash-card"><h3>Total Out</h3><h2 class="text-danger">৳ <span id="total-expense">0</span></h2></div>
+                <div class="card dash-card"><h3>Balance</h3><h2 class="text-primary">৳ <span id="current-balance">0</span></h2></div>
+            </div>
+        </div>
+
+        <div id="transactions" class="slide">
+            <div class="card">
+                <form id="finance-form">
+                    <select id="type"><option value="savings">Money IN</option><option value="expense">Money OUT</option></select>
+                    <input type="number" id="amount" placeholder="Amount" required>
+                    <input type="text" id="bank" placeholder="Bank/Source (e.g. bKash)" required>
+                    <input type="text" id="desc" placeholder="Description" required>
+                    <button type="submit" class="submit-btn">Save Entry</button>
+                </form>
+                <div id="transaction-list" class="list-container"></div>
+            </div>
+        </div>
+
+        <div id="bank" class="slide">
+            <div class="card"><div class="bank-summary-grid" id="bank-summary"></div></div>
+        </div>
+
+        <div id="notes" class="slide">
+            <div class="card">
+                <form id="note-form"><textarea id="note-text" placeholder="Write note..." required></textarea><button type="submit" class="submit-btn">Add Note</button></form>
+                <div id="notes-list" class="list-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+        let notes = JSON.parse(localStorage.getItem('notes')) || [];
+
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            element.classList.add('active');
+        }
+
+        function updateUI() {
+            let s = transactions.filter(t => t.type === 'savings').reduce((a, b) => a + b.amount, 0);
+            let e = transactions.filter(t => t.type === 'expense').reduce((a, b) => a + b.amount, 0);
+            document.getElementById('total-savings').innerText = s.toLocaleString();
+            document.getElementById('total-expense').innerText = e.toLocaleString();
+            document.getElementById('current-balance').innerText = (s - e).toLocaleString();
+
+            const bankSummary = document.getElementById('bank-summary');
+            bankSummary.innerHTML = '';
+            let bMap = {};
+            transactions.forEach(t => {
+                bMap[t.bank] = (bMap[t.bank] || 0) + (t.type === 'savings' ? t.amount : -t.amount);
+            });
+            for(let b in bMap) {
+                bankSummary.innerHTML += `<div class="bank-stat"><h4>${b}</h4><h2>৳ ${bMap[b].toLocaleString()}</h2></div>`;
+            }
+        }
+
+        function render() {
+            const tList = document.getElementById('transaction-list');
+            tList.innerHTML = transactions.slice().reverse().map(t => `<div class="item"><div><h4>${t.desc} <span class="bank-badge">${t.bank}</span></h4></div><div>${t.type === 'savings' ? '+' : '-'} ৳${t.amount}</div></div>`).join('');
+            updateUI();
+        }
+
+        document.getElementById('finance-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            transactions.push({ id: Date.now(), type: document.getElementById('type').value, amount: parseFloat(document.getElementById('amount').value), bank: document.getElementById('bank').value, desc: document.getElementById('desc').value });
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            document.getElementById('finance-form').reset();
+            render();
+        });
+
+        render();
+    </script>
+</body>
+</html>
